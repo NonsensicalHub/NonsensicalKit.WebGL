@@ -1,0 +1,16 @@
+{
+    "name": "NonsensicalKit.WebGL",
+    "rootNamespace": "",
+    "references": [
+        "GUID:55d4ddbff78191249917bbc28198939d"
+    ],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}
