@@ -4,7 +4,7 @@ using UnityEngine.TestTools;
 using NUnit.Framework;
 using System.Collections;
 
-namespace TonyBeanDong.Webgl.Editor.Tests 
+namespace NonsensicalKit.WebGL.Editor.Tests 
 {
 	
 	class EditorExampleTest 

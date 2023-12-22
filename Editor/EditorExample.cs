@@ -4,7 +4,7 @@
 //
 // -----------------------------------------------------------------------------
 
-namespace TonyBeanDong.Webgl.Editor
+namespace NonsensicalKit.WebGL.Test
 {
     /// <summary>
     /// Provide a general description of the public class.

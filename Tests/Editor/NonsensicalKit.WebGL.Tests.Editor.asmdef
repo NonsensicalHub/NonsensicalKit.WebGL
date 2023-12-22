@@ -1,5 +1,5 @@
 {
-    "name": "NonsensicalKit.WebGL.Editor.Tests",
+    "name": "NonsensicalKit.WebGL.Tests.Editor",
     "rootNamespace": "",
     "references": [
         "UnityEngine.TestRunner",

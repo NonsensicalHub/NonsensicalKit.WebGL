@@ -1,5 +1,5 @@
-using NonsensicalKit.Editor;
-using NonsensicalKit.Editor.Log;
+using NonsensicalKit.Core;
+using NonsensicalKit.Core.Log;
 using System.Collections.Generic;
 using System.Runtime.InteropServices;
 using UnityEngine;

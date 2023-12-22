@@ -3,7 +3,7 @@ using UnityEngine.TestTools;
 using NUnit.Framework;
 using System.Collections;
 
-namespace TonyBeanDong.Webgl.Tests 
+namespace NonsensicalKit.WebGL.Tests
 {
 	
 	class RuntimeExampleTest 
