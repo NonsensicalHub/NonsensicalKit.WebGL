@@ -7,7 +7,7 @@ namespace NonsensicalKit.WebGL
     /// 用于处理socketIO相关操作
     /// </summary>
     [AddComponentMenu("NonsensicalKit/WebGL/SocketIO")]
-    public  class WebSocketIO : MonoSingleton<WebSocketIO>
+    public class WebSocketIO : MonoSingleton<WebSocketIO>
     {
         protected override void Awake()
         {

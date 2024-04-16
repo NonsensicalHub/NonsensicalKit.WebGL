@@ -45,7 +45,6 @@ $(function () {
             sendMessageToUnity("SocketIOMessage", data, eventName, id);
         });
     }
-
     $.fn.sendMessage = function (eventName, c, id) {
         sockets[id].emit(eventName, JSON.parse(c));
     }

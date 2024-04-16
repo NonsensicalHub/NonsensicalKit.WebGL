@@ -34,6 +34,10 @@
   <script src="JavaScripts/webSocketIO.js"></script>
   <script src="JavaScripts/socket.io.min.js"></script>
   #endif
+  #if Use_MQTT
+  <script src="JavaScripts/mqtt.min.js"></script>
+  <script src="JavaScripts/webMQTT.js"></script>
+  #endif
   <script>
     const showFullScreenButton = "{{{ SHOW_FULL_SCREEN_BUTTON }}}";
     const buildUrl = "Build";
