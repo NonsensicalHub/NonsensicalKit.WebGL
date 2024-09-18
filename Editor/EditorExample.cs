@@ -4,7 +4,7 @@
 //
 // -----------------------------------------------------------------------------
 
-namespace NonsensicalKit.WebGL.Test
+namespace NonsensicalKit.WebGL.Editor
 {
     /// <summary>
     /// Provide a general description of the public class.

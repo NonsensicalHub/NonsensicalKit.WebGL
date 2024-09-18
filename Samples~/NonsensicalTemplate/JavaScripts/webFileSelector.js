@@ -49,7 +49,7 @@ function fileSelect() {
         var newUrl= URL.createObjectURL(files[i]);
         fileUrls.push(newUrl);
         array.push(files[i].name);
-        array.push(newUrl.substring(5));
+        array.push(newUrl);
     }
 
     var str = JSON.stringify(array);
