@@ -1,8 +1,10 @@
 using NonsensicalKit.Core;
 using NonsensicalKit.Core.Log;
 using System.Collections.Generic;
-using System.Runtime.InteropServices;
 using UnityEngine;
+#if UNITY_WEBGL&& !UNITY_EDITOR
+using System.Runtime.InteropServices;
+#endif
 
 namespace NonsensicalKit.WebGL
 {
@@ -15,8 +17,16 @@ namespace NonsensicalKit.WebGL
     {
         [SerializeField] private bool m_logMessage;
 
-        [DllImport("__Internal")]
+#if UNITY_WEBGL&& !UNITY_EDITOR
+        [DllImport("__Internal", CharSet = CharSet.Auto)]
         private static extern void sendMessageToJS(string key, string values);
+        [DllImport("__Internal", CharSet = CharSet.Auto)]
+        private static extern void syncDB();
+#else
+
+        private void sendMessageToJS(string key, string values) { }
+        private void syncDB() { }
+#endif
 
         private Queue<string[]> _buffer = new Queue<string[]>();
 
@@ -53,6 +63,14 @@ namespace NonsensicalKit.WebGL
             }
         }
 
+        public void SyncDB()
+        {
+            if (_running)
+            {
+                syncDB();
+            }
+        }
+
         public void SendMessageToJS(string key)
         {
             if (_running)
@@ -60,6 +78,7 @@ namespace NonsensicalKit.WebGL
                 sendMessageToJS(key, string.Empty);
             }
         }
+
 
         public void SendMessageToJS(string key, string[] values)
         {
