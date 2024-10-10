@@ -18,9 +18,9 @@ namespace NonsensicalKit.WebGL
         [SerializeField] private bool m_logMessage;
 
 #if UNITY_WEBGL&& !UNITY_EDITOR
-        [DllImport("__Internal", CharSet = CharSet.Auto)]
+        [DllImport("__Internal")]
         private static extern void sendMessageToJS(string key, string values);
-        [DllImport("__Internal", CharSet = CharSet.Auto)]
+        [DllImport("__Internal")]
         private static extern void syncDB();
 #else
 
