@@ -10,6 +10,11 @@
       "displayName": "NonsensicalTemplate",
       "description": "WebGL\u6a21\u677f",
       "path": "Samples~/NonsensicalTemplate"
+    },
+    {
+      "displayName": "TransparentBackground",
+      "description": "透明背景",
+      "path": "Samples~/TransparentBackground"
     }
   ]
 }
