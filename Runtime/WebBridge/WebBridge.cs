@@ -1,5 +1,6 @@
 using NonsensicalKit.Core;
 using NonsensicalKit.Core.Log;
+using NonsensicalKit.Tools;
 using System.Collections.Generic;
 using UnityEngine;
 #if UNITY_WEBGL&& !UNITY_EDITOR
@@ -23,7 +24,6 @@ namespace NonsensicalKit.WebGL
         [DllImport("__Internal")]
         private static extern void syncDB();
 #else
-
         private void sendMessageToJS(string key, string values) { }
         private void syncDB() { }
 #endif
@@ -79,12 +79,11 @@ namespace NonsensicalKit.WebGL
             }
         }
 
-
         public void SendMessageToJS(string key, string[] values)
         {
             if (_running)
             {
-                var str = NonsensicalKit.Tools.JsonTool.SerializeObject(values);
+                var str = JsonTool.SerializeObject(values);
                 sendMessageToJS(key, str);
             }
         }
@@ -99,7 +98,7 @@ namespace NonsensicalKit.WebGL
             {
                 LogCore.Debug($"WebBridge收到JavaScript消息：{str}");
             }
-            string[] values = NonsensicalKit.Tools.JsonTool.DeserializeObject<string[]>(str);
+            string[] values = JsonTool.DeserializeObject<string[]>(str);
             _buffer.Enqueue(values);
         }
 

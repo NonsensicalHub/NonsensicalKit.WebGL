@@ -15,6 +15,11 @@
       "displayName": "TransparentBackground",
       "description": "透明背景",
       "path": "Samples~/TransparentBackground"
+    },
+    {
+      "displayName": "WebIframeSample",
+      "description": "WebIframe示例",
+      "path": "Samples~/WebIframeSample"
     }
   ]
 }
