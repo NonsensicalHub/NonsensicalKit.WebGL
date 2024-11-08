@@ -4,6 +4,7 @@ using UnityEngine;
 
 namespace NonsensicalKit.WebGL
 {
+    [AddComponentMenu("NonsensicalKit/WebGL/Iframe")]
     public class WebIframe : MonoSingleton<WebIframe>
     {
         protected override void Awake()

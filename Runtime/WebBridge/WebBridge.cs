@@ -1,7 +1,8 @@
+using System;
+using System.Collections.Generic;
 using NonsensicalKit.Core;
 using NonsensicalKit.Core.Log;
 using NonsensicalKit.Tools;
-using System.Collections.Generic;
 using UnityEngine;
 #if UNITY_WEBGL&& !UNITY_EDITOR
 using System.Runtime.InteropServices;
@@ -24,8 +25,13 @@ namespace NonsensicalKit.WebGL
         [DllImport("__Internal")]
         private static extern void syncDB();
 #else
-        private void sendMessageToJS(string key, string values) { }
-        private void syncDB() { }
+        private void sendMessageToJS(string key, string values)
+        {
+        }
+
+        private void syncDB()
+        {
+        }
 #endif
 
         private Queue<string[]> _buffer = new Queue<string[]>();
@@ -76,6 +82,10 @@ namespace NonsensicalKit.WebGL
             if (_running)
             {
                 sendMessageToJS(key, string.Empty);
+                if (m_logMessage)
+                {
+                    LogCore.Debug($"WebBridge往JavaScript发送消息：{key}");
+                }
             }
         }
 
@@ -85,6 +95,10 @@ namespace NonsensicalKit.WebGL
             {
                 var str = JsonTool.SerializeObject(values);
                 sendMessageToJS(key, str);
+                if (m_logMessage)
+                {
+                    LogCore.Debug($"WebBridge往JavaScript发送消息：{key}：{StringTool.GetSetString(values)}");
+                }
             }
         }
 
@@ -98,19 +112,21 @@ namespace NonsensicalKit.WebGL
             {
                 LogCore.Debug($"WebBridge收到JavaScript消息：{str}");
             }
+
             string[] values = JsonTool.DeserializeObject<string[]>(str);
             _buffer.Enqueue(values);
         }
 
         private void HandleUrlQuery(string s)
         {
-            string[] values = s.Split(new char[] { '?', '&', '=' }, System.StringSplitOptions.RemoveEmptyEntries);
+            string[] values = s.Split(new char[] { '?', '&', '=' }, StringSplitOptions.RemoveEmptyEntries);
 
             Dictionary<string, string> httpArgs = new Dictionary<string, string>();
             for (int i = 0; i < values.Length - 1; i += 2)
             {
                 httpArgs.Add(values[i], values[i + 1]);
             }
+
             IOCC.Set("httpArgs", httpArgs);
         }
     }
