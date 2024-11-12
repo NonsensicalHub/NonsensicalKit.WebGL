@@ -17,6 +17,10 @@ namespace NonsensicalKit.WebGL
         {
             Publish("SendMessageToJS", "Iframe", new string[] { "Change", minX.ToString(), minY.ToString(), maxX.ToString(), maxY.ToString(), url, id });
         }
+        public void Create( string id = "default")
+        {
+            Publish("SendMessageToJS", "Iframe", new string[] { "Create", id });
+        }
 
         public void Move(float minX, float minY, float maxX, float maxY, string id = "default")
         {
@@ -45,8 +49,6 @@ namespace NonsensicalKit.WebGL
 
         private void OnListIframe(string[] values)
         {
-            //TODO:获取当前管理的Iframe信息
-
             var v = JsonTool.DeserializeObject<IframeInfo[]>(values[1]);
 
             Publish<IframeInfo[]>("IframeInfos", v);
