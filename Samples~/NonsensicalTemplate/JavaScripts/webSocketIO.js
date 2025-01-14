@@ -2,7 +2,7 @@ initEvents.push(init);
 
 function init() {
     console.log("websocketIO Init");
-    webBridgeEvent["SocketIO"]= socketIOEvent;
+    webBridgeEvent["SocketIO"] = socketIOEvent;
 }
 
 function socketIOEvent(values) {
@@ -42,7 +42,11 @@ $(function () {
     }
     $.fn.addListener = function (eventName, id) {
         sockets[id].on(eventName, (data) => {
-            sendMessageToUnity("SocketIOMessage", data, eventName, id);
+            if (data.constructor == String) {
+                sendMessageToUnity("SocketIOMessage", data, eventName, id);
+            } else {
+                sendMessageToUnity("SocketIOMessage", JSON.stringify(data), eventName, id);
+            }
         });
     }
     $.fn.sendMessage = function (eventName, c, id) {
