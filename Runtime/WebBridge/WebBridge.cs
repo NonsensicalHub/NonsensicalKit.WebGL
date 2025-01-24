@@ -119,7 +119,7 @@ namespace NonsensicalKit.WebGL
 
         private void HandleUrlQuery(string s)
         {
-            string[] values = s.Split(new char[] { '?', '&', '=' }, StringSplitOptions.RemoveEmptyEntries);
+            string[] values = s.Split(new[] { '?', '&', '=' }, StringSplitOptions.RemoveEmptyEntries);
 
             Dictionary<string, string> httpArgs = new Dictionary<string, string>();
             for (int i = 0; i < values.Length - 1; i += 2)

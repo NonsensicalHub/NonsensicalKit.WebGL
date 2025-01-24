@@ -9,15 +9,8 @@ namespace WebGLSupport
     {
         const string MenuPath = "Assets/WebGLSupport/OverwriteFullscreenButton";
 
-#if UNITY_2021_1_OR_NEWER
-        static readonly bool supportedPostprocessor = true;
-        static readonly string defaultFullscreenFunc = "unityInstance.SetFullscreen(1);";
-        static readonly string fullscreenNode = "unity-container";
-#else
-        static readonly bool supportedPostprocessor = false;
-        static readonly string defaultFullscreenFunc = "";
-        static readonly string fullscreenNode = "";
-#endif
+        private const string DefaultFullscreenFunc = "unityInstance.SetFullscreen(1);";
+        private const string FullscreenNode = "unity-container";
 
         private static bool IsEnable => PlayerPrefs.GetInt(MenuPath, 1) == 1;
 
@@ -25,7 +18,6 @@ namespace WebGLSupport
         public static void OnPostprocessBuild(BuildTarget target, string pathToBuiltProject)
         {
             if (target != BuildTarget.WebGL) return;
-            if (!supportedPostprocessor) return;
             if (!IsEnable) return;
 
             var path = Path.Combine(pathToBuiltProject, "index.html");
@@ -34,9 +26,9 @@ namespace WebGLSupport
             var html = File.ReadAllText(path);
 
             // check node is exist
-            if (html.Contains(fullscreenNode))
+            if (html.Contains(FullscreenNode))
             {
-                html = html.Replace(defaultFullscreenFunc, $"document.makeFullscreen('{fullscreenNode}');");
+                html = html.Replace(DefaultFullscreenFunc, $"document.makeFullscreen('{FullscreenNode}');");
                 File.WriteAllText(path, html);
             }
         }

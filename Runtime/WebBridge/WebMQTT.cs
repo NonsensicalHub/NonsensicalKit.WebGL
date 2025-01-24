@@ -34,7 +34,7 @@ namespace NonsensicalKit.WebGL
         {
             Publish("SendMessageToJS", "MQTT", new string[] { "End" });
         }
-        
+
         private void OnMQTTMessage(string[] values)
         {
             OnMQTTMessage(values[1], values[2]);
@@ -42,7 +42,6 @@ namespace NonsensicalKit.WebGL
 
         private void OnMQTTMessage(string topic, string message)
         {
-            Debug.Log($"mqtt test: {topic}: {message}");
             PublishWithID("MQTTMessage", topic, message);
             Publish("MQTTMessage", topic, message);
             Publish("MQTTMessage", message);

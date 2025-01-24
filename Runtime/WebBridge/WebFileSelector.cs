@@ -1,5 +1,6 @@
-using NonsensicalKit.Core;
 using System.Collections.Generic;
+using NonsensicalKit.Core;
+using NonsensicalKit.Tools;
 using UnityEngine;
 
 namespace NonsensicalKit.WebGL
@@ -29,9 +30,9 @@ namespace NonsensicalKit.WebGL
         private void ChoiceFiles(string nameWithUrl, string id)
         {
             Debug.Log(nameWithUrl);
-            string[] array = NonsensicalKit.Tools.JsonTool.DeserializeObject<string[]>(nameWithUrl);
+            string[] array = JsonTool.DeserializeObject<string[]>(nameWithUrl);
 
-            Debug.Log(NonsensicalKit.Tools.JsonTool.SerializeObject(array));
+            Debug.Log(JsonTool.SerializeObject(array));
             List<string> names = new List<string>();
             List<string> urls = new List<string>();
             for (int i = 0; i < array.Length - 1; i += 2)
@@ -39,6 +40,7 @@ namespace NonsensicalKit.WebGL
                 names.Add(array[i]);
                 urls.Add(array[i + 1]);
             }
+
             PublishWithID("WebFileSelected", id, names, urls);
             Publish("WebFileSelected", names, urls);
         }

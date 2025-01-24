@@ -1,12 +1,11 @@
-using NUnit.Framework;
 using System.Collections;
+using NUnit.Framework;
 using UnityEngine.TestTools;
 
 namespace NonsensicalKit.WebGL.Editor.Tests
 {
     class EditorExampleTest
     {
-
         [Test]
         public void EditorSampleTestSimplePasses()
         {
