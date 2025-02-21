@@ -3,10 +3,10 @@ initEvents.push(init);
 function init() {
     console.log("webMQTT Init");
     webBridgeEvent["MQTT"] = MQTTEvent;
+    sendMessageToUnity("MQTTEvent", "InitCompleted");
 }
 
 function MQTTEvent(values) {
-
     switch (values[0]) {
         case "Connect":
             connect(values[1], values[2], values[3]);
@@ -14,11 +14,14 @@ function MQTTEvent(values) {
         case "Subscribe":
             subscribe(values[1]);
             break;
+        case "Unsubscribe":
+            unsubscribe(values[1]);
+            break;
         case "Publish":
             publish(values[1], values[2]);
             break;
-        case "End":
-            end();
+        case "Close":
+            close();
             break;
     }
 }
@@ -41,7 +44,7 @@ function connect(url, user, pass) {
     client = mqtt.connect(url, options);
     // 成功连接后触发的回调
     client.on('connect', () => {
-        console.log('MQTT连接成功');
+        sendMessageToUnity("MQTTEvent", "ConnectSuccess", clientId);
     });
     // 当客户端收到一个发布过来的消息时触发回调
     /** 
@@ -51,7 +54,7 @@ function connect(url, user, pass) {
      */
     client.on('message', onMessage);
 }
-function end() {
+function close() {
     if (client != null) {
         client.end()
     }
@@ -59,8 +62,34 @@ function end() {
 
 function subscribe(topic) {
     // 订阅主题，这里可以订阅多个主题
-    client.subscribe(topic);
+    try {
+        var temp = JSON.parse(topic);
+        if (Array.isArray(temp) && temp.length > 1) {
+            client.subscribe(temp);
+        } else {
+            client.subscribe(topic);
+        }
+    }
+    catch (e) {
+        console.error("解析 JSON 失败:", e);
+    }
 }
+
+
+function unsubscribe(topic) {
+    // 取消订阅主题，这里可以取消订阅多个主题
+    try {
+        var temp = JSON.parse(topic);
+        if (Array.isArray(temp) && temp.length > 1) {
+            client.unsubscribe(temp);
+        } else {
+            client.unsubscribe(topic);
+        }
+    } catch (e) {
+        console.error("解析 JSON 失败:", e);
+    }
+}
+
 function publish(topic, msg) {
     // 发送信息给 topic（主题）
     client.publish(topic, msg);
@@ -73,4 +102,5 @@ function onMessage(topic, message, packet) {
     // console.log("数据对应订阅主题：", topic)
     // console.log("获取到的数据包：", packet)
     sendMessageToUnity("MQTTMessage", topic, message.toString());
+    console.log("MQTTMessage", topic, message.toString());
 }
