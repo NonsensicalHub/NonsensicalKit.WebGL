@@ -20,6 +20,16 @@ namespace NonsensicalKit.WebGL
             Publish("SendMessageToJS", "SocketIO", new string[] { "ConnectSocketIO", url, id });
         }
 
+        public void Disconnect(string id = "default")
+        {
+            Publish("SendMessageToJS", "SocketIO", new string[] { "Disconnect", id });
+        }
+
+        public void DisconnectAll()
+        {
+            Publish("SendMessageToJS", "SocketIO", new string[] { "DisconnectAll" });
+        }
+
         public void SocketIOAddListener(string eventName, string id = "default")
         {
             Publish("SendMessageToJS", "SocketIO", new string[] { "AddListener", eventName, id });
@@ -42,7 +52,7 @@ namespace NonsensicalKit.WebGL
 
         private void OnSocketIOMessage(string message, string eventName, string id)
         {
-            PublishWithID("SocketIOMessage", id, eventName, message);
+            Publish("SocketIOMessage", id, eventName, message);
             Publish("SocketIOMessage", eventName, message);
             Publish("SocketIOMessage", message);
         }
