@@ -21,32 +21,35 @@ namespace NonsensicalKit.WebGL
             Publish("SendMessageToJS", "MQTT", new string[] { "Connect", url, userName, password });
         }
 
-        public void Subscribe(string topic)
+        public void Subscribe(string url, string topic)
         {
-            Publish("SendMessageToJS", "MQTT", new string[] { "Subscribe", topic });
+            Publish("SendMessageToJS", "MQTT", new string[] { "Subscribe", url, topic });
         }
 
-        public void Unsubscribe(string topic)
+        public void Unsubscribe(string url, string topic)
         {
-            Publish("SendMessageToJS", "MQTT", new string[] { "Unsubscribe", topic });
+            Publish("SendMessageToJS", "MQTT", new string[] { "Unsubscribe", url, topic });
         }
 
-
-        public void SendMessage(string topic, string msg)
+        public void SendMessage(string url, string topic, string msg)
         {
-            Publish("SendMessageToJS", "MQTT", new string[] { "Publish", topic, msg });
+            Publish("SendMessageToJS", "MQTT", new string[] { "Publish", url, topic, msg });
         }
 
-        public void Close()
+        public void Close(string url)
         {
-            Publish("SendMessageToJS", "MQTT", new string[] { "Close" });
+            Publish("SendMessageToJS", "MQTT", new string[] { "Close", url });
+        }
+        public void CloseAll()
+        {
+            Publish("SendMessageToJS", "MQTT", new string[] { "CloseAll" });
         }
 
         private void OnMQTTMessage(string[] values)
         {
-            OnMQTTMessage(values[1], values[2]);
+            OnMQTTMessage(values[1], values[2], values[3]);
         }
-
+        
         private void OnMQTTEvent(string[] values)
         {
             switch (values[1])
@@ -58,16 +61,19 @@ namespace NonsensicalKit.WebGL
                 }
                 case "ConnectSuccess":
                 {
+                    //2是url，3是客户端id
                     Publish("MQTTConnectSuccess");
                     Publish("MQTTConnectSuccess", values[2]);
+                    Publish("MQTTConnectSuccess", values[2], values[3]);
                     break;
                 }
             }
         }
 
-        private void OnMQTTMessage(string topic, string message)
+        private void OnMQTTMessage(string url, string topic, string message)
         {
             PublishWithID("MQTTMessage", topic, message);
+            Publish("MQTTMessage", url, topic, message);
             Publish("MQTTMessage", topic, message);
             Publish("MQTTMessage", message);
         }
