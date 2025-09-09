@@ -19,61 +19,72 @@ function socketIOEvent(values) {
         case "SendMessageWithCallback":
             sendMessageWithCallback(values[1], values[2], values[3]);
             break;
-        case "Disconnect":
-            Disconnect(values[1]);
-            break;
-        case "DisconnectAll":
-            DisconnectAll();
-            break;
     }
 }
+const sockets = [];
 
 function connectSocketIO(url, id) {
-    $().connectSocketIO(url, id);
-}
-function addListener(eventName, id) {
-    $().addListener(eventName, id);
-}
-function sendMessage(eventName, msg, id) {
-    $().sendMessage(eventName, msg, id);
-}
-function sendMessageWithCallback(eventName, msg, id) {
-    $().sendMessageWithCallback(eventName, msg, id);
-}
-function Disconnect(id) {
-    $().Disconnect(id);
-}
-function DisconnectAll() {
-    $().DisconnectAll();
+    // 确保 io 可用
+    if (typeof io !== "function") {
+        console.error("Socket.IO 客户端 (io) 未找到，请先引入 socket.io 客户端库。");
+        return;
+    }
+    try {
+        sockets[id] = io(url);
+    } catch (e) {
+        console.error("connectSocketIO 出错：", e);
+    }
 }
 
-$(function () {
-    let sockets = new Array();
-    $.fn.connectSocketIO = function (url, id) {
-        sockets[id] = io(url);
+function addListener(eventName, id) {
+    const sock = sockets[id];
+    if (!sock) {
+        console.warn(`addListener: socket id ${id} 不存在。`);
+        return;
     }
-    $.fn.addListener = function (eventName, id) {
-        sockets[id].on(eventName, (data) => {
-            if (typeof data=="string") {
-                sendMessageToUnity("SocketIOMessage", data, eventName, id);
-            } else {
-                sendMessageToUnity("SocketIOMessage", JSON.stringify(data), eventName, id);
-            }
+    sock.on(eventName, (data) => {
+        sendMessageToUnity("SocketIOMessage", data, eventName, id);
+    });
+}
+
+function sendMessage(eventName, c, id) {
+    const sock = sockets[id];
+    if (!sock) {
+        console.warn(`sendMessage: socket id ${id} 不存在。`);
+        return;
+    }
+    let payload;
+    try {
+        payload = JSON.parse(c);
+    } catch (e) {
+        console.error("sendMessage: JSON.parse 失败，发送原始字符串。错误：", e);
+        payload = c;
+    }
+    try {
+        sock.emit(eventName, payload);
+    } catch (e) {
+        console.error("sendMessage emit 出错：", e);
+    }
+}
+
+function sendMessageWithCallback(eventName, c, id) {
+    const sock = sockets[id];
+    if (!sock) {
+        console.warn(`sendMessageWithCallback: socket id ${id} 不存在。`);
+        return;
+    }
+    let payload;
+    try {
+        payload = JSON.parse(c);
+    } catch (e) {
+        console.error("sendMessageWithCallback: JSON.parse 失败，发送原始字符串。错误：", e);
+        payload = c;
+    }
+    try {
+        sock.emit(eventName, payload, (callback) => {
+            sendMessageToUnity("SocketIOMessage", callback, eventName, id);
         });
+    } catch (e) {
+        console.error("sendMessageWithCallback emit 出错：", e);
     }
-    $.fn.sendMessage = function (eventName, c, id) {
-        sockets[id].emit(eventName, JSON.parse(c));
-    }
-    $.fn.sendMessageWithCallback = function (eventName, c, id) {
-        sockets[id].emit(eventName, JSON.parse(c), (callback) => { sendMessageToUnity("SocketIOMessage", callback, eventName, id) });
-    }
-    $.fn.Disconnect = function (id) {
-        sockets[id].disconnect();
-        sockets[id] = null;
-    }
-    $.fn.DisconnectAll = function () {
-        sockets.forEach(element => {
-            element.disconnect();
-        });
-    }
-});
+}

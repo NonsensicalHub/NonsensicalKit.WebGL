@@ -5,6 +5,7 @@ function init() {
     webBridgeEvent["Iframe"] = iframeEvent;
 }
 
+var idTemp, keyTemp, messageTemp;
 function iframeEvent(values) {
 
     switch (values[0]) {
@@ -16,6 +17,7 @@ function iframeEvent(values) {
             break;
         case "Move":
             move(values[1], values[2], values[3], values[4], values[5]);
+            //console.log(values);
             break;
         case "SetUrl":
             setUrl(values[1], values[2]);
@@ -29,6 +31,15 @@ function iframeEvent(values) {
         case "CloseAll":
             closeAll();
             break;
+        case "ChangeAlpha":
+            changeAlpha(values[1], values[2]);
+            break;
+        case "SendMessage":
+            sendMessageToIframe(values[1], values[2], values[3]);//[1]:id,[2]key, [3]:message
+            idTemp = values[1];
+            keyTemp = values[2];
+            messageTemp = values[3];
+            break;
     }
 }
 
@@ -39,10 +50,17 @@ function change(minX, minY, maxX, maxY, url, id) {
     move(minX, minY, maxX, maxY, id);
     setUrl(url, id);
 }
+function changeAlpha(alpha, id) {
+    if (iframes.has(id)) {
+        var trueID = "webIframe_" + id;
+        var iframeElement = document.getElementById(trueID);
+        iframeElement.alpha = alpha;
+    }
+}
 function create(id) {
     if (iframes.has(id) == false) {
         iframes.set(id, new IframeInfo(id));
-        createIframe(id,0,0,0,0,"");
+        createIframe(id, 0, 0, 0, 0, "");
     }
 }
 
@@ -97,8 +115,17 @@ function createIframe(id) {
     var iframe = document.createElement("iframe");
     iframe.id = trueID;
     iframe.style.position = "fixed";
-    iframe.style.display = "block"; 
+    iframe.style.display = "block";
     //iframe.style.pointerEvents = "none"; //鼠标事件穿透，会导致无法和iframe内容交互
+    iframe.onload = function () {
+        console.log(`${trueID} iframe has loaded`);
+        if (idTemp != null && keyTemp != null && messageTemp != null) {
+
+            sendMessageToIframe(idTemp, keyTemp, messageTemp);
+            idTemp = keyTemp = messageTemp = null;
+        }
+    };
+
     document.body.append(iframe);
 }
 
@@ -124,6 +151,26 @@ function closeIframe(id) {
     var iframe = document.getElementById(trueID);
     iframe.remove();
 }
+
+
+function sendMessageToIframe(id, key, message) {
+    var trueID = "webIframe_" + id;
+    var iframe = document.getElementById(trueID);
+    if (iframe != null) {
+        iframe.contentWindow.postMessage([key, message], "*");
+    }
+    else {
+        console.log(`${trueID} iframe is null`);
+    }
+    /*   
+    //子窗口添加事件监听,进行消息处理
+    window.onload = function () {
+    window.addEventListener('message', function (e) {  // 监听 message 事件
+        console.log("unity  " + e.data);
+    })};  
+    */
+}
+
 
 class IframeInfo {
     constructor(id, minX, minY, maxX, maxY, url) {
