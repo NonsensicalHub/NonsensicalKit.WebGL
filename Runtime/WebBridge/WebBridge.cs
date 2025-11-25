@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Runtime.InteropServices;
 using NonsensicalKit.Core;
 using NonsensicalKit.Core.Log;
 using NonsensicalKit.Tools;
@@ -24,6 +25,11 @@ namespace NonsensicalKit.WebGL
         private static extern void sendMessageToJS(string key, string values);
         [DllImport("__Internal")]
         private static extern void syncDB();
+        [DllImport("__Internal")]
+        private static extern int GetLocalStorage(string key);  
+        [DllImport("__Internal")]
+        private static extern void FreeMemory(int ptr);
+
 #else
         private void sendMessageToJS(string key, string values)
         {
@@ -31,6 +37,15 @@ namespace NonsensicalKit.WebGL
 
         private void syncDB()
         {
+        }
+        private int GetLocalStorage(string key)
+        {
+            return 0;
+        }
+
+        private void FreeMemory(int ptr)
+        {
+            
         }
 #endif
 
@@ -117,6 +132,27 @@ namespace NonsensicalKit.WebGL
             _buffer.Enqueue(values);
         }
 
+        /// <summary>
+        /// 从缓存中读取数据
+        /// </summary>
+        /// <param name="key">缓存键</param>
+        /// <returns></returns>
+        public string GetStringFromCache(string key = "ACCESS_TOKEN")
+        {
+            // WebGL平台才调用浏览器接口
+            if (Application.platform == RuntimePlatform.WebGLPlayer)
+            {
+                int ptr = GetLocalStorage(key);
+                if (ptr != 0)
+                {
+                    string token = Marshal.PtrToStringUTF8((IntPtr)ptr);
+                    FreeMemory(ptr); // 释放分配的内存
+                    return token;
+                }
+            }
+            return "";
+        }
+        
         private void HandleUrlQuery(string s)
         {
             string[] values = s.Split(new[] { '?', '&', '=' }, StringSplitOptions.RemoveEmptyEntries);
