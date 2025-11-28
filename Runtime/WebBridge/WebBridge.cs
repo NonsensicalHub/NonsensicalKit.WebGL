@@ -76,6 +76,9 @@ namespace NonsensicalKit.WebGL
                     case "UrlQueryStr":
                         HandleUrlQuery(v[1]);
                         continue;
+                    case "UrlHref":
+                        IOCC.Set("UrlHref", v);
+                        continue;
                     default:
                         Publish("WebBridge", v);
                         PublishWithID("WebBridge", v[0], v);
@@ -165,5 +168,7 @@ namespace NonsensicalKit.WebGL
 
             IOCC.Set("httpArgs", httpArgs);
         }
+        
+        
     }
 }
