@@ -71,6 +71,10 @@ namespace NonsensicalKit.WebGL
             {
                 var v = _buffer.Dequeue();
 
+                if (v.Length==0)
+                {
+                    continue;
+                }
                 switch (v[0])
                 {
                     case "UrlQueryStr":
