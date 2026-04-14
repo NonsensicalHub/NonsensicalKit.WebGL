@@ -104,7 +104,7 @@ namespace WebGLSupport
 #endif
     }
 
-    public class WebGLInput : MonoBehaviour, IComparable<WebGLInput>
+    public class WebGLInput : MonoBehaviour, IDeselectHandler, IComparable<WebGLInput>
     {
         public static event KeyboardEventHandler OnKeyboardDown;
         public static event KeyboardEventHandler OnKeyboardUp;
@@ -135,7 +135,6 @@ namespace WebGLSupport
 
             if (GetComponent<WebGLUIToolkitTextField>()) return new WrappedUIToolkit(GetComponent<WebGLUIToolkitTextField>());
 #if TMP_WEBGL_SUPPORT
-            if (GetComponent<TMPro.TMP_InputFieldExt>()) return new WrappedTMPInputFieldExt(GetComponent<TMPro.TMP_InputFieldExt>());
             if (GetComponent<TMPro.TMP_InputField>()) return new WrappedTMPInputField(GetComponent<TMPro.TMP_InputField>());
 #endif // TMP_WEBGL_SUPPORT
 
@@ -162,8 +161,7 @@ namespace WebGLSupport
                     enabled = false;
                 }
             }
-			
-			if(input.GetType() == typeof(WrappedTMPInputFieldExt)) ((WrappedTMPInputFieldExt)input).OnPositionChanged.AddListener(SyncPos);
+            OnKeyboardDown += KeyboardDownHandler;
         }
 
         /// <summary>
@@ -195,8 +193,6 @@ namespace WebGLSupport
         {
             if (id != -1) throw new Exception("OnSelect : id != -1");
 
-			Debug.Log("OnSelect");
-			
             var rect = GetElemetRect();
             bool isPassword = input.contentType == ContentType.Password;
 
@@ -231,7 +227,6 @@ namespace WebGLSupport
             }
 
             WebGLWindow.OnBlurEvent += OnWindowBlur;
-
         }
 
         /// <summary>
@@ -251,27 +246,6 @@ namespace WebGLSupport
                 WebGLInputPlugin.WebGLInputSetSelectionRange(id, cursorIndex.Value, cursorIndex.Value);
             }
         }
-		
-        public void SyncPos(int cursorIndex)
-        {
-            if (!instances.ContainsKey(id)) return;
-
-            var instance = instances[id];
-			WebGLInputPlugin.WebGLInputSetSelectionRange(id, cursorIndex, cursorIndex);
-          
-        }
-		
-		
-		public void SyncSelection(string str, int cursorStart, int cursorEnd)
-        {
-            if (!instances.ContainsKey(id)) return;
-
-            var instance = instances[id];
-
-            WebGLInputPlugin.WebGLInputText(id, instance.input.text);
-
-            WebGLInputPlugin.WebGLInputSetSelectionRange(id, cursorStart, cursorEnd);
-        }
 
         private void OnWindowBlur()
         {
@@ -282,8 +256,6 @@ namespace WebGLSupport
         {
             if (!instances.ContainsKey(id)) return;
 
-Debug.Log("DeactivateInputField");
-			
             WebGLInputPlugin.WebGLInputDelete(id);
             input.DeactivateInputField();
             instances.Remove(id);
@@ -312,14 +284,13 @@ Debug.Log("DeactivateInputField");
 
         static IEnumerator Blur(int id)
         {
-Debug.Log("Blur: " +id);			
             yield return null;
             if (!instances.ContainsKey(id)) yield break;
 
             var block = instances[id].blurBlock;    // get blur block state
             instances[id].blurBlock = false;        // reset instalce block state
             if (block) yield break;                 // if block. break it!!
-            instances[id].DeactivateInputField();
+            // instances[id].DeactivateInputField();
         }
 
         [MonoPInvokeCallback(typeof(Action<int, string>))]
@@ -342,17 +313,30 @@ Debug.Log("Blur: " +id);
                 }
             }
 
+            var start = WebGLInputPlugin.WebGLInputSelectionStart(id);
+            var end = WebGLInputPlugin.WebGLInputSelectionEnd(id);
+
             // InputField の ContentType による整形したテキストを HTML の input に再設定します
             if (value != instance.input.text)
             {
-                var start = WebGLInputPlugin.WebGLInputSelectionStart(id);
-                var end = WebGLInputPlugin.WebGLInputSelectionEnd(id);
                 // take the offset.when char remove from input.
                 var offset = instance.input.text.Length - value.Length;
 
                 WebGLInputPlugin.WebGLInputText(id, instance.input.text);
                 // reset the input element selection range!!
                 WebGLInputPlugin.WebGLInputSetSelectionRange(id, start + offset, end + offset);
+            }
+
+            // 選択方向によって設定します
+            if (WebGLInputPlugin.WebGLInputSelectionDirection(id) == -1)
+            {
+                instance.input.selectionFocusPosition = start;
+                instance.input.selectionAnchorPosition = end;
+            }
+            else
+            {
+                instance.input.selectionFocusPosition = end;
+                instance.input.selectionAnchorPosition = start;
             }
         }
         [MonoPInvokeCallback(typeof(Action<int, string>))]
@@ -375,7 +359,7 @@ Debug.Log("Blur: " +id);
             if (!instances.ContainsKey(id)) return;
             var instance = instances[id];
 
-            // mode : keydown(1) keyup(3)
+            // mode : keydown(1) keyup(2)
             var cb = mode switch
             {
                 1 => OnKeyboardDown,
@@ -383,9 +367,94 @@ Debug.Log("Blur: " +id);
                 _ => default
             };
 
-            if (cb != null)
+            if (key != null)
             {
-                cb(instance, new KeyboardEvent(key, code, shiftKey != 0, ctrlKey != 0, altKey != 0));
+                cb?.Invoke(instance, new KeyboardEvent(id, key, code, shiftKey != 0, ctrlKey != 0, altKey != 0));
+            }
+        }
+
+        private bool TryGetKeyboardEventKeyString(KeyboardEvent keyboardEvent, out string eventKeyString)
+        {
+            eventKeyString = default;
+
+            string eventModifiers = string.Empty;
+            eventModifiers += keyboardEvent.ShiftKey ? "#" : "";
+            eventModifiers += keyboardEvent.CtrlKey ? "^" : "";
+            eventModifiers += keyboardEvent.AltKey ? "&" : "";
+
+            string eventKey = string.Empty;
+            // 必要なイベントだけ処理する
+            switch (keyboardEvent.Key)
+            {
+                case "ArrowLeft":
+                    eventKey = "left";
+                    break;
+                case "ArrowUp":
+                    eventKey = "up";
+                    break;
+                case "ArrowRight":
+                    eventKey = "right";
+                    break;
+                case "ArrowDown":
+                    eventKey = "down";
+                    break;
+                case "Home":
+                    eventKey = "home";
+                    break;
+                case "End":
+                    eventKey = "end";
+                    break;
+                case "Shift":
+                    eventKey = KeyCode.LeftShift.ToString();
+                    break;
+                case "Control":
+                    eventKey = KeyCode.LeftControl.ToString();
+                    break;
+                default:
+                    break;
+            }
+
+            if (!string.IsNullOrEmpty(eventModifiers))
+            {
+                // Ctrl + A : SelectAll Event
+                if (keyboardEvent.Key == "a" || keyboardEvent.Key == "A")
+                {
+                    eventKey = KeyCode.A.ToString();
+                }
+            }
+
+            if (!string.IsNullOrEmpty(eventKey))
+            {
+                eventKeyString = eventModifiers + eventKey;
+                return true;
+            }
+            else
+            {
+                return false;
+            }
+        }
+        private void KeyboardDownHandler(WebGLInput instance, KeyboardEvent keyboardEvent)
+        {
+            if (instance == null || id != keyboardEvent.Id)
+            {
+                return;
+            }
+
+            if (TryGetKeyboardEventKeyString(keyboardEvent, out var eventKeyString))
+            {
+                instance.input.CreateKeyEvent(Event.KeyboardEvent(eventKeyString));
+            }
+
+            int startPos = instance.input.selectionAnchorPosition;
+            int endPos = instance.input.selectionFocusPosition;
+
+            if (startPos <= endPos)
+            {
+                WebGLInputPlugin.WebGLInputSetSelectionRange(keyboardEvent.Id, startPos, endPos);
+            }
+            else
+            {
+                WebGLInputPlugin.WebGLInputSetSelectionRange(keyboardEvent.Id, endPos, startPos);
             }
         }
 
@@ -420,21 +489,19 @@ Debug.Log("Blur: " +id);
                 {
                     // focus this id
                     WebGLInputPlugin.WebGLInputFocus(id);
-                }
-            }
 
-            var start = WebGLInputPlugin.WebGLInputSelectionStart(id);
-            var end = WebGLInputPlugin.WebGLInputSelectionEnd(id);
-            // 選択方向によって設定します
-            if (WebGLInputPlugin.WebGLInputSelectionDirection(id) == -1)
-            {
-                input.selectionFocusPosition = start;
-                input.selectionAnchorPosition = end;
-            }
-            else
-            {
-                input.selectionFocusPosition = end;
-                input.selectionAnchorPosition = start;
+                    int startPos = input.selectionAnchorPosition;
+                    int endPos = input.selectionFocusPosition;
+
+                    if (startPos <= endPos)
+                    {
+                        WebGLInputPlugin.WebGLInputSetSelectionRange(id, startPos, endPos);
+                    }
+                    else
+                    {
+                        WebGLInputPlugin.WebGLInputSetSelectionRange(id, endPos, startPos);
+                    }
+                }
             }
 
             input.Rebuild();
@@ -449,9 +516,7 @@ Debug.Log("Blur: " +id);
             Input.ResetInputAxes(); // Inputの状態リセット
 #endif
             DeactivateInputField();
-
-            if (input != null && input.GetType() == typeof(WrappedTMPInputFieldExt)) ((WrappedTMPInputFieldExt)input).OnPositionChanged.RemoveListener(SyncPos);
-
+            OnKeyboardDown -= KeyboardDownHandler;
         }
 
         private void OnEnable()
@@ -461,6 +526,7 @@ Debug.Log("Blur: " +id);
         private void OnDisable()
         {
             WebGLInputTabFocus.Remove(this);
+            DeactivateInputField();
         }
         public int CompareTo(WebGLInput other)
         {
@@ -479,7 +545,10 @@ Debug.Log("Blur: " +id);
             if (current != null) return;
             WebGLInputPlugin.WebGLInputForceBlur(id);   // Input ではないし、キーボードを閉じる
         }
-
+        void IDeselectHandler.OnDeselect(BaseEventData eventData)
+        {
+            DeactivateInputField();
+        }
         /// <summary>
         /// to manage tab focus
         /// base on scene position
