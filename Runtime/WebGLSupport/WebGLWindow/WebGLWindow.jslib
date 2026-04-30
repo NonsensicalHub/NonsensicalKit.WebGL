@@ -19,15 +19,15 @@ var WebGLWindow = {
         }
     },
     WebGLWindowUninit : function() {
-        if(focusListener) {
+        if(this.focusListener) {
             window.removeEventListener('focus', this.focusListener);
             this.focusListener = null;
         }
-        if(blurListener) {
+        if(this.blurListener) {
             window.removeEventListener('blur', this.blurListener);
             this.blurListener = null;
         }
-        if(resizeListener) {
+        if(this.resizeListener) {
             window.removeEventListener('resize', this.resizeListener);
             this.resizeListener = null;
         }
