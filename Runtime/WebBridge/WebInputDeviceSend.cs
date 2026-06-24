@@ -22,7 +22,7 @@ public class WebInputDeviceSend : MonoSingleton<WebInputDeviceSend>
     }
 
     /// <summary>
-    ///  创建远程输入设备监听,之后会将硬件设备的信息发送给,host
+    ///  创建远程输入设备监听,之后会将硬件设备的信息发送给,host 
     /// </summary>
     /// <param name="host"></param>
     /// <param name="port"></param>
