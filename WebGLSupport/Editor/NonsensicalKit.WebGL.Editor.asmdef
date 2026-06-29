@@ -2,7 +2,7 @@
     "name": "NonsensicalKit.WebGL.Editor",
     "rootNamespace": "",
     "references": [
-        "NonsensicalKit.WebGL"
+        "WebGLInput"
     ],
     "includePlatforms": [
         "Editor"

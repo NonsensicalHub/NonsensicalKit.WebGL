@@ -1,6 +1,7 @@
 # NonsensicalKit.WebGL
 
 `com.nonsensicallab.nonsensicalkit.webgl` 是 NonsensicalKit 的 WebGL 平台能力包，主要提供 Web 模板接入、Unity 与 JavaScript 双向通信，以及 Web 端常见兼容辅助能力。
+需要发布到WebGL平台时导入这个包。
 
 ## 文档说明
 
