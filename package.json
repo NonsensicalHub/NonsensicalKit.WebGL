@@ -6,21 +6,26 @@
   },
   "version": "0.9.0",
   "unity": "2021.3",
-  "description": "WebGL\u76f8\u5173\uff0c\u4f9d\u8d56Core",
+  "license": "MIT",
+  "description": "WebGL相关，依赖Core",
+  "dependencies": {
+    "com.nonsensicallab.nonsensicalkit.core": "1.0.7",
+    "com.unity.textmeshpro": "3.0.9"
+  },
   "samples": [
     {
       "displayName": "NonsensicalTemplate",
-      "description": "WebGL\u6a21\u677f",
+      "description": "WebGL模板",
       "path": "Samples~/NonsensicalTemplate"
     },
     {
       "displayName": "TransparentBackground",
-      "description": "\u900f\u660e\u80cc\u666f",
+      "description": "透明背景",
       "path": "Samples~/TransparentBackground"
     },
     {
       "displayName": "WebIframeSample",
-      "description": "WebIframe\u793a\u4f8b",
+      "description": "WebIframe示例",
       "path": "Samples~/WebIframeSample"
     }
   ]
